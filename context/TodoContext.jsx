@@ -12,7 +12,6 @@ export function TodoProvider({ children }) {
   const [sortOrder, setSortOrder] = useState("asc");
   const [filteredTasks, setFilteredTasks] = useState([]);
 
-
   useEffect(() => {
     fetchTodos();
   }, []);
@@ -77,6 +76,8 @@ export function TodoProvider({ children }) {
 
   const filterAndSortTasks = () => {
     let filtered = [...tasks];
+    console.log("Original tasks:", tasks)
+    console.log("Filtering tasks with:", filtered)
 
     if (searchQuery) {
       filtered = filtered.filter((task) =>
@@ -127,11 +128,13 @@ export function TodoProvider({ children }) {
     setTasks(tasks.filter((t) => t.id !== id));
   };
 
- const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.status === "Completed").length;
-  const inProgressTasks = tasks.filter((t) => t.status === "In Progress").length;
-  const pendingTasks = tasks.filter((t) => t.status === "Pending").length;
 
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.status === "Completed").length;
+  const inProgressTasks = tasks.filter(
+    (t) => t.status === "In Progress"
+  ).length;
+  const pendingTasks = tasks.filter((t) => t.status === "Pending").length;
 
   return (
     <TodoContext.Provider
@@ -143,16 +146,17 @@ export function TodoProvider({ children }) {
         deleteTask,
         updateTask,
         setSearchQuery,
-        setStatusFilter,  
+        setStatusFilter,
         setSortOrder,
         filteredTasks,
         sortOrder,
         statusFilter,
         searchQuery,
-          totalTasks,
-    completedTasks,
-    inProgressTasks,
-    pendingTasks
+        totalTasks,
+        completedTasks,
+        inProgressTasks,
+        pendingTasks,
+        setFilteredTasks
       }}
     >
       {children}

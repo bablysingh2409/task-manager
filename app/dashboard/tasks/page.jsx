@@ -1,22 +1,34 @@
 "use client";
 
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Plus, Filter, Calendar } from "lucide-react";
 import { useTodo } from "@/context/TodoContext";
+import { useEffect } from "react";
 
 export default function TasksPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { filteredTasks,statusFilter, loading, markComplete, deleteTask, setSearchQuery, setStatusFilter, setSortOrder,searchQuery,sortOrder  } = useTodo();
+  const {
+    filteredTasks,
+    tasks,
+    statusFilter,
+    loading,
+    markComplete,
+    deleteTask,
+    setSearchQuery,
+    setStatusFilter,
+    setSortOrder,
+    searchQuery,
+    sortOrder,
+    setFilteredTasks
+  } = useTodo();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
+    if (status === "unauthenticated") router.push("/login");
+  }, [status]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -31,37 +43,54 @@ export default function TasksPage() {
     }
   };
 
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    console.log("Drag result:", result);
+
+    //  current filtered list
+    const newOrder = Array.from(filteredTasks);
+    const [movedItem] = newOrder.splice(result.source.index, 1);
+    newOrder.splice(result.destination.index, 0, movedItem);
+
+    const reorderedIds = newOrder.map((t) => t.id);
+
+    const newGlobalTasks = [...tasks].sort(
+      (a, b) => reorderedIds.indexOf(a.id) - reorderedIds.indexOf(b.id)
+    );
+
+    setFilteredTasks(newGlobalTasks);
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading tasks...</div>
+        <p>Loading tasks...</p>
       </div>
     );
   }
 
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      <main className="max-w-7xl mx-auto px-4 py-2">
         <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">My Tasks</h2>
+          <h2 className="text-2xl font-bold">My Tasks</h2>
           <Link
             href="/dashboard/tasks/new"
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             <Plus size={20} />
             Add New Task
           </Link>
         </div>
 
+        {/* Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid md:grid-cols-3 gap-4">
             <div className="relative">
               <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 size={20}
               />
               <input
@@ -69,19 +98,19 @@ export default function TasksPage() {
                 placeholder="Search tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg"
               />
             </div>
 
             <div className="relative">
               <Filter
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 size={20}
               />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg appearance-none"
               >
                 <option value="All">All Status</option>
                 <option value="Pending">Pending</option>
@@ -92,13 +121,13 @@ export default function TasksPage() {
 
             <div className="relative">
               <Calendar
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 size={20}
               />
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg appearance-none"
               >
                 <option value="asc">Due Date (Earliest)</option>
                 <option value="desc">Due Date (Latest)</option>
@@ -107,74 +136,108 @@ export default function TasksPage() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
-              <p className="text-gray-500">No tasks found</p>
-            </div>
-          ) : (
-            filteredTasks.map((task) => (
+        {/* Drag & Drop list */}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="taskList">
+            {(provided) => (
               <div
-                key={task.id}
-                className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="space-y-4"
               >
-                <div className="flex justify-between items-start sm:flex-row flex-col gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {task.title}
-                      </h3>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          task.status
-                        )}`}
-                      >
-                        {task.status}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mb-3">{task.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={16} />
-                        Due: {new Date(task.dueDate).toLocaleDateString()}
-                      </span>
-                    </div>
+                {filteredTasks.length === 0 ? (
+                  <div className="bg-white rounded-lg shadow p-8 text-center">
+                    <p className="text-gray-500">No tasks found</p>
                   </div>
-
-                  <div className="flex gap-2">
-                    {task.status !== "Completed" && (
-                      <>
-                        <Link
-                          href={`/dashboard/tasks/edit/${task.id}`}
-                          className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => markComplete(task.id)}
-                          className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          Complete
-                        </button>
-                      </>
-                    )}
-                    {task.status === "Completed" && (
-                      <span className="px-4 py-2 text-sm bg-gray-100 text-gray-500 rounded-lg">
-                        Completed
-                      </span>
-                    )}
-                    <button
-                      onClick={() => deleteTask(task.id)}
-                      className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                ) : (
+                  filteredTasks.map((task, index) => (
+                    <Draggable
+                      key={task.id}
+                      draggableId={String(task.id)}
+                      index={index}
                     >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+                      {(draggableProvided, snapshot) => (
+                        <div
+                          ref={draggableProvided.innerRef}
+                          {...draggableProvided.draggableProps}
+                          {...draggableProvided.dragHandleProps}
+                          className={`bg-white rounded-lg shadow p-6 transition-shadow ${
+                            snapshot.isDragging ? "ring-2 ring-indigo-300" : ""
+                          }`}
+                        >
+                          <div className="flex justify-between items-start sm:flex-row flex-col gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-lg font-semibold text-gray-800">
+                                  {task.title}
+                                </h3>
+
+                                <span
+                                  className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                    task.status
+                                  )}`}
+                                >
+                                  {task.status}
+                                </span>
+                              </div>
+
+                              <p className="text-gray-600 mb-3">
+                                {task.description}
+                              </p>
+
+                              <div className="flex items-center gap-4 text-sm text-gray-500">
+                                <span className="flex items-center gap-1">
+                                  <Calendar size={16} />
+                                  Due:{" "}
+                                  {new Date(task.dueDate).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              {task.status !== "Completed" && (
+                                <>
+                                  <Link
+                                    href={`/dashboard/tasks/edit/${task.id}`}
+                                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                  >
+                                    Edit
+                                  </Link>
+
+                                  <button
+                                    onClick={() => markComplete(task.id)}
+                                    className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                  >
+                                    Complete
+                                  </button>
+                                </>
+                              )}
+
+                              {task.status === "Completed" && (
+                                <span className="px-4 py-2 text-sm bg-gray-100 text-gray-500 rounded-lg">
+                                  Completed
+                                </span>
+                              )}
+
+                              <button
+                                onClick={() => deleteTask(task.id)}
+                                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))
+                )}
+
+                {provided.placeholder}
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </main>
     </div>
   );
