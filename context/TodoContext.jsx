@@ -7,10 +7,19 @@ const TodoContext = createContext();
 export function TodoProvider({ children }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [filteredTasks, setFilteredTasks] = useState([]);
+
 
   useEffect(() => {
     fetchTodos();
   }, []);
+
+  useEffect(() => {
+    filterAndSortTasks();
+  }, [tasks, searchQuery, statusFilter, sortOrder]);
 
   const fetchTodos = async () => {
     try {
@@ -66,23 +75,43 @@ export function TodoProvider({ children }) {
     setTasks([newTask, ...tasks]);
   };
 
-  const updateTask = async(id, updatedTask) => {
-     await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: updatedTask.title,
-          completed: updatedTask.status === "Completed",
-          userId: 1,
-        }),
-      });
-    setTasks((prev) =>
-    prev.map((task) => (task.id === id ? { ...task, ...updatedTask } : task))
-  );
-};
+  const filterAndSortTasks = () => {
+    let filtered = [...tasks];
 
+    if (searchQuery) {
+      filtered = filtered.filter((task) =>
+        task.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (statusFilter !== "All") {
+      filtered = filtered.filter((task) => task.status === statusFilter);
+    }
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.dueDate).getTime();
+      const dateB = new Date(b.dueDate).getTime();
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+
+    setFilteredTasks(filtered);
+  };
+
+  const updateTask = async (id, updatedTask) => {
+    await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: updatedTask.title,
+        completed: updatedTask.status === "Completed",
+        userId: 1,
+      }),
+    });
+    setTasks((prev) =>
+      prev.map((task) => (task.id === id ? { ...task, ...updatedTask } : task))
+    );
+  };
 
   const markComplete = (id) => {
     setTasks(
@@ -106,7 +135,14 @@ export function TodoProvider({ children }) {
         addTask,
         markComplete,
         deleteTask,
-        updateTask
+        updateTask,
+        setSearchQuery,
+        setStatusFilter,  
+        setSortOrder,
+        filteredTasks,
+        sortOrder,
+        statusFilter,
+        searchQuery,
       }}
     >
       {children}

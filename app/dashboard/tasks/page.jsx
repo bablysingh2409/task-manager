@@ -10,10 +10,7 @@ import { useTodo } from "@/context/TodoContext";
 export default function TasksPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const { tasks, loading, markComplete, deleteTask } = useTodo();
+  const { filteredTasks,statusFilter, loading, markComplete, deleteTask, setSearchQuery, setStatusFilter, setSortOrder,searchQuery,sortOrder  } = useTodo();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -111,12 +108,12 @@ export default function TasksPage() {
         </div>
 
         <div className="space-y-4">
-          {tasks.length === 0 ? (
+          {filteredTasks.length === 0 ? (
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <p className="text-gray-500">No tasks found</p>
             </div>
           ) : (
-            tasks.map((task) => (
+            filteredTasks.map((task) => (
               <div
                 key={task.id}
                 className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
