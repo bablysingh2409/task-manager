@@ -1,91 +1,126 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Link from "next/link";
+import { ListTodo, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { useTodo } from "@/context/TodoContext";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
+const {
+  totalTasks,
+  completedTasks,
+  inProgressTasks,
+  pendingTasks
+} = useTodo();
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status]);
+  }, [status, router]);
 
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600 text-lg">Loading dashboard...</div>
+        <div className="text-gray-600">Loading...</div>
       </div>
     );
   }
 
-  if (!session) return null;
+  if (!session) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="min-h-screen bg-gray-50">
 
-        {/* Greeting */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Hello, {session.user?.name} 👋
-          </h1>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+            Welcome {session.user?.name?.split(" ")[0]}!
+          </h2>
           <p className="text-gray-600">
-            Welcome back! Here&apos;s what&apos;s happening today.
+            Here&apos;s an overview of your task management
           </p>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <QuickActionCard
-            title="Create New Task"
-            description="Add a new task to your list."
-            buttonLabel="Create Task"
-            href="/dashboard/tasks/new"
-          />
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <ListTodo className="text-blue-600" size={24} />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-1">{totalTasks}</h3>
+            <p className="text-sm text-gray-600">Total Tasks</p>
+          </div>
 
-          <QuickActionCard
-            title="View All Tasks"
-            description="See all your tasks in one place."
-            buttonLabel="View Tasks"
-            href="/dashboard/tasks"
-          />
-        </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <CheckCircle className="text-green-600" size={24} />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-1">{completedTasks}</h3>
+            <p className="text-sm text-gray-600">Completed</p>
+          </div>
 
-        {/* User Session Details */}
-        <div className="bg-white shadow rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
-            Session Details
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-700 text-sm">
-            <p><strong>Email:</strong> {session.user?.email}</p>
-            <p><strong>Status:</strong> Active</p>
-            <p><strong>Provider:</strong> GitHub / Google / Credentials</p>
-            <p><strong>Last Login:</strong> Just now</p>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <Clock className="text-yellow-600" size={24} />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-1">{inProgressTasks}</h3>
+            <p className="text-sm text-gray-600">In Progress</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-100 rounded-lg">
+                <AlertCircle className="text-red-600" size={24} />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-1">{pendingTasks}</h3>
+            <p className="text-sm text-gray-600">Pending</p>
           </div>
         </div>
 
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">
+            Quick Actions
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Link
+              href="/dashboard/tasks/new"
+              className="p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
+            >
+              <div className="text-4xl mb-2">➕</div>
+              <h4 className="font-semibold text-gray-800 mb-1">
+                Create New Task
+              </h4>
+              <p className="text-sm text-gray-600">
+                Add a new task to your list
+              </p>
+            </Link>
+
+            <Link
+              href="/dashboard/tasks"
+              className="p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
+            >
+              <div className="text-4xl mb-2">📋</div>
+              <h4 className="font-semibold text-gray-800 mb-1">View All Tasks</h4>
+              <p className="text-sm text-gray-600">
+                See and manage all your tasks
+              </p>
+            </Link>
+
+          </div>
+        </div>
       </main>
-    </div>
-  );
-}
-
-
-function QuickActionCard({ title, description, buttonLabel, href }) {
-  return (
-    <div className="bg-white shadow rounded-xl p-6 border border-gray-200">
-      <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-      <p className="text-gray-600 mt-2">{description}</p>
-
-      <a
-        href={href}
-        className="inline-block mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        {buttonLabel}
-      </a>
     </div>
   );
 }

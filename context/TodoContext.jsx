@@ -127,6 +127,12 @@ export function TodoProvider({ children }) {
     setTasks(tasks.filter((t) => t.id !== id));
   };
 
+ const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.status === "Completed").length;
+  const inProgressTasks = tasks.filter((t) => t.status === "In Progress").length;
+  const pendingTasks = tasks.filter((t) => t.status === "Pending").length;
+
+
   return (
     <TodoContext.Provider
       value={{
@@ -143,6 +149,10 @@ export function TodoProvider({ children }) {
         sortOrder,
         statusFilter,
         searchQuery,
+          totalTasks,
+    completedTasks,
+    inProgressTasks,
+    pendingTasks
       }}
     >
       {children}
