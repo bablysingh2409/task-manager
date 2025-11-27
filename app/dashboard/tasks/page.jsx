@@ -34,7 +34,7 @@ export default function TasksPage() {
   const fetchTasks = async () => {
     try {
       const response = await fetch(
-        "https://jsonplaceholder.typicode.com/todos"
+        "https://jsonplaceholder.typicode.com/todos?page=1&limit=10"
       );
       const todos = await response.json();
 
