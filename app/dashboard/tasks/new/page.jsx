@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTodo } from "@/context/TodoCotext";
 
 export default function NewTaskPage() {
   const { data: session, status } = useSession();
@@ -17,6 +18,8 @@ export default function NewTaskPage() {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const { addTask } = useTodo();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -64,22 +67,21 @@ export default function NewTaskPage() {
     setLoading(true);
 
     try {
-      await fetch("https://jsonplaceholder.typicode.com/todos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          completed: false,
-          userId: 1,
-        }),
-      });
 
+      const newTask = {
+        id: Date.now(),
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        dueDate: formData.dueDate,
+        completed: formData.status === "Completed",
+      };
+
+      addTask(newTask);
       toast.success("Task created successfully!");
       router.push("/dashboard/tasks");
     } catch (error) {
-      alert("Error creating task. Please try again.");
+      toast.error("Error creating task. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -99,9 +101,7 @@ export default function NewTaskPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-     
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-       
         <div className="bg-white rounded-lg shadow p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Create New Task

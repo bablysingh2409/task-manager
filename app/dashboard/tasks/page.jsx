@@ -5,106 +5,22 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Plus, Filter, Calendar } from "lucide-react";
+import { useTodo } from "@/context/TodoCotext";
 
 
 export default function TasksPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [tasks, setTasks] = useState([]);
-  const [filteredTasks, setFilteredTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortOrder, setSortOrder] = useState("asc");
+   const { tasks, loading, markComplete, deleteTask } = useTodo();
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     }
   }, [status, router]);
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortTasks();
-  }, [tasks, searchQuery, statusFilter, sortOrder]);
-
-  const fetchTasks = async () => {
-    try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/todos?page=1&limit=10"
-      );
-      const todos = await response.json();
-
-      const enhancedTasks = todos.slice(0, 20).map((todo) => ({
-        id: todo.id,
-        userId: todo.userId,
-        title: todo.title,
-        description: `This is a detailed description for task: ${todo.title}`,
-        status: todo.completed
-          ? "Completed"
-          : Math.random() > 0.5
-          ? "In Progress"
-          : "Pending",
-        dueDate: generateRandomDate(),
-        completed: todo.completed,
-      }));
-
-      setTasks(enhancedTasks);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateRandomDate = () => {
-    const start = new Date();
-    const end = new Date();
-    end.setDate(end.getDate() + 30);
-    const date = new Date(
-      start.getTime() + Math.random() * (end.getTime() - start.getTime())
-    );
-    return date.toISOString().split("T")[0];
-  };
-
-  const filterAndSortTasks = () => {
-    let filtered = [...tasks];
-
-    if (searchQuery) {
-      filtered = filtered.filter((task) =>
-        task.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== "All") {
-      filtered = filtered.filter((task) => task.status === statusFilter);
-    }
-
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.dueDate).getTime();
-      const dateB = new Date(b.dueDate).getTime();
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-    });
-
-    setFilteredTasks(filtered);
-  };
-
-  const handleMarkComplete = async (taskId) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId
-          ? { ...task, status: "Completed", completed: true }
-          : task
-      )
-    );
-  };
-
-  const handleDelete = (taskId) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -197,12 +113,12 @@ export default function TasksPage() {
         </div>
 
         <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
+          {tasks.length === 0 ? (
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <p className="text-gray-500">No tasks found</p>
             </div>
           ) : (
-            filteredTasks.map((task) => (
+            tasks.map((task) => (
               <div
                 key={task.id}
                 className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
@@ -240,7 +156,7 @@ export default function TasksPage() {
                           Edit
                         </Link>
                         <button
-                          onClick={() => handleMarkComplete(task.id)}
+                          onClick={() => markComplete(task.id)}
                           className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                         >
                           Complete
@@ -253,7 +169,7 @@ export default function TasksPage() {
                       </span>
                     )}
                     <button
-                      onClick={() => handleDelete(task.id)}
+                      onClick={() => deleteTask(task.id)}
                       className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       Delete
