@@ -8,7 +8,7 @@ export default function Home() {
           Task Manager
         </h1>
         <p className="text-xl text-gray-600 mb-8">
-          Manage your tasks efficiently with OAuth authentication
+          Manage your tasks efficiently
         </p>
         <Link
           href="/login"
