@@ -1,13 +1,14 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 
 export default function DashboardLayout({ children }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -25,6 +26,11 @@ export default function DashboardLayout({ children }) {
 
   if (!session) return null;
 
+  const linkClass = (path) =>
+    pathname === path
+      ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1"
+      : "text-gray-600 hover:text-gray-900";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -33,17 +39,14 @@ export default function DashboardLayout({ children }) {
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-bold text-gray-800">Task Manager</h1>
 
-              {/* Links */}
-              <Link
-                href="/dashboard"
-                className="text-gray-600 hover:text-gray-900"
-              >
+              {/* Links with Active Highlight */}
+              <Link href="/dashboard" className={linkClass("/dashboard")}>
                 Dashboard
               </Link>
 
               <Link
                 href="/dashboard/tasks"
-                className="text-gray-600 hover:text-gray-900"
+                className={linkClass("/dashboard/tasks")}
               >
                 Tasks
               </Link>

@@ -106,7 +106,7 @@ export default function EditTaskPage() {
   if (isCompleted) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
             <h2 className="text-2xl font-bold text-yellow-800 mb-4">
               Task is Completed
