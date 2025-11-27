@@ -66,6 +66,24 @@ export function TodoProvider({ children }) {
     setTasks([newTask, ...tasks]);
   };
 
+  const updateTask = async(id, updatedTask) => {
+     await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: updatedTask.title,
+          completed: updatedTask.status === "Completed",
+          userId: 1,
+        }),
+      });
+    setTasks((prev) =>
+    prev.map((task) => (task.id === id ? { ...task, ...updatedTask } : task))
+  );
+};
+
+
   const markComplete = (id) => {
     setTasks(
       tasks.map((task) =>
@@ -88,6 +106,7 @@ export function TodoProvider({ children }) {
         addTask,
         markComplete,
         deleteTask,
+        updateTask
       }}
     >
       {children}

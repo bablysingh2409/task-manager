@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Plus, Filter, Calendar } from "lucide-react";
-import { useTodo } from "@/context/TodoCotext";
-
+import { useTodo } from "@/context/TodoContext";
 
 export default function TasksPage() {
   const { data: session, status } = useSession();
@@ -14,7 +13,7 @@ export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortOrder, setSortOrder] = useState("asc");
-   const { tasks, loading, markComplete, deleteTask } = useTodo();
+  const { tasks, loading, markComplete, deleteTask } = useTodo();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -49,7 +48,6 @@ export default function TasksPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">My Tasks</h2>
