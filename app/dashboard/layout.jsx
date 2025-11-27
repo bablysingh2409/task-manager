@@ -37,7 +37,7 @@ export default function DashboardLayout({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-6">
-              <h1 className="text-xl font-bold text-gray-800">Task Manager</h1>
+              <h1 className="text-xl font-bold text-gray-800 hidden md:block">Task Manager</h1>
 
               {/* Links with Active Highlight */}
               <Link href="/dashboard" className={linkClass("/dashboard")}>
@@ -53,7 +53,7 @@ export default function DashboardLayout({ children }) {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
+              <div className=" items-center gap-3 hidden md:flex">
                 {session.user?.image && (
                   <img
                     src={session.user.image}
@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }) {
 
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                className="px-4 py-2 sm:text-sm text-xs bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 Sign Out
               </button>
