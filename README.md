@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Task Manager - Next.js Application
+
+A modern task management application built with Next.js, featuring OAuth authentication, drag-and-drop functionality, and comprehensive testing.
+
+## Features
+
+✅ OAuth Authentication (GitHub & Google)
+✅ Email/Password Authentication
+✅ Task CRUD Operations
+✅ Search & Filter Tasks
+✅ Sort by Due Date
+✅ Drag & Drop Reordering
+✅ Task Status Management
+✅ Protected Routes
+✅ Responsive Design
+✅ Comprehensive Unit Tests (>70% Coverage)
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Authentication:** NextAuth.js
+- **Styling:** Tailwind CSS
+- **Drag & Drop:** @hello-pangea/dnd
+- **Testing:** Jest & React Testing Library
+- **State Management:** React Context API
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ installed
+- GitHub OAuth App credentials
+- Google OAuth App credentials
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/bablysingh2409/task-manager.git
+cd task-manager
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Create `.env.local` file:
+```env
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-min-32-characters
+GITHUB_ID=your_github_client_id
+GITHUB_SECRET=your_github_client_secret
+GOOGLE_ID=your_google_client_id
+GOOGLE_SECRET=your_google_client_secret
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000)
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Testing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Run tests:
+```bash
+npm test
+```
 
-## Deploy on Vercel
+Run tests with coverage:
+```bash
+npm run test:coverage
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Watch mode:
+```bash
+npm run test:watch
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Test Coverage
+
+Current test coverage: **>70%**
+
+### Tested Components:
+- TodoContext (State Management)
+- Authentication Service
+- Dashboard Page
+- Tasks Page
+- New Task Page
+- Edit Task Page
+
+### Test Cases Include:
+- ✅ Positive flows (successful operations)
+- ✅ Negative flows (validation errors)
+- ✅ Edge cases (empty states, completed tasks)
+- ✅ User interactions (search, filter, sort)
+- ✅ Authentication flows
+
+## Project Structure
+```
+task-manager/
+├── app/
+│   ├── api/auth/[...nextauth]/
+│   ├── dashboard/
+│   │   ├── tasks/
+│   │   │   ├── new/
+│   │   │   └── edit/[id]/
+│   │   └── page.jsx
+│   ├── login/
+│   └── page.jsx
+├── components/
+├── context/
+│   └── TodoContext.jsx
+├── lib/
+│   └── auth.js
+├── __tests__/
+│   ├── context/
+│   ├── lib/
+│   └── app/
+└── package.json
+```
+
+## Bonus Features Implemented
+
+- ✅ Drag & Drop task reordering
+- ✅ Comprehensive unit tests (>70% coverage)
+- ✅ Modern UI/UX with Tailwind CSS
+- ✅ Toast notifications
+- ✅ Form validation
+- ✅ Responsive design
