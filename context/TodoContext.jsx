@@ -43,7 +43,7 @@ export function TodoProvider({ children }) {
 
       setTasks(enhanced);
     } catch (err) {
-      console.log("Error:", err);
+      toast.error("Failed to fetch tasks.");
     } finally {
       setLoading(false);
     }
@@ -76,8 +76,6 @@ export function TodoProvider({ children }) {
 
   const filterAndSortTasks = () => {
     let filtered = [...tasks];
-    console.log("Original tasks:", tasks)
-    console.log("Filtering tasks with:", filtered)
 
     if (searchQuery) {
       filtered = filtered.filter((task) =>

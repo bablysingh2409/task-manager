@@ -167,10 +167,11 @@ export default function NewTaskPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-2">
                 Due Date <span className="text-red-500">*</span>
               </label>
               <input
+                id="dueDate"
                 type="date"
                 value={formData.dueDate}
                 onChange={(e) =>

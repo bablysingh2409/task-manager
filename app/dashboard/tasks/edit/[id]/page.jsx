@@ -197,10 +197,11 @@ export default function EditTaskPage() {
 
             {/* Due Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label  htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-2">
                 Due Date
               </label>
               <input
+                id="dueDate"
                 type="date"
                 value={formData.dueDate}
                 onChange={(e) =>
